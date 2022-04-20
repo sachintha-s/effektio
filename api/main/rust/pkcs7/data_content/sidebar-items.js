@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DataContent","The content that is just an octet string."]]});

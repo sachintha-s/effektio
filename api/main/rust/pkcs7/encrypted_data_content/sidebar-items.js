@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Version","Syntax version of the `encrypted-data` content type."]],"struct":[["EncryptedDataContent","Encrypted-data content type RFC 5652 § 8"]]});

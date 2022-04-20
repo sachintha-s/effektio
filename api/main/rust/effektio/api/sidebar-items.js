@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["guest_client",""],["login_new_client",""],["login_with_token",""]],"mod":[["api",""]],"struct":[["AnyMessage",""],["Client",""],["ClientStateBuilder","Builder for `ClientState`."],["Conversation",""],["Group",""],["Member",""],["Room",""],["TimelineStream",""]],"type":[["UserId",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["ffi_gen","Selects an abi based on the compile target and uses ffigen to generate the rust api."]]});
