@@ -316,10 +316,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 isChatScreen: true,
                 roomName: roomName,
                 onButtonPressed: () async {
-                  await controller.handleSendPressed(
-                    controller.textEditingController.text,
-                  );
-                  controller.textEditingController.clear();
+                  String _text =
+                      controller.mentionKey.currentState!.controller!.text;
+                  controller.messageTextMap.forEach((key, value) {
+                    _text = _text.replaceAll(key, value);
+                  });
+                  await controller.handleSendPressed(_text);
+                  controller.messageTextMap.clear();
+                  controller.mentionKey.currentState!.controller!.clear();
                   controller.sendButtonUpdate();
                 },
               ),

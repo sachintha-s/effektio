@@ -1,7 +1,9 @@
 import 'package:effektio/common/store/themes/SeperatedThemes.dart';
 import 'package:effektio/controllers/chat_room_controller.dart';
+import 'package:effektio/widgets/CustomAvatar.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mentions/flutter_mentions.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:themed/themed.dart';
@@ -79,17 +81,24 @@ class CustomChatInput extends StatelessWidget {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: TextField(
+                          child: FlutterMentions(
+                            key: controller.mentionKey,
+                            suggestionPosition: SuggestionPosition.Top,
+                            onMentionAdd: (user) {
+                              controller.messageTextMap.addAll({
+                                '@${user['display']}':
+                                    '[${user['display']}](https://matrix.to/#/${user['link']})'
+                              });
+                            },
                             onChanged: ((value) async {
                               controller.sendButtonUpdate();
-                              await controller.room.typingNotice(true);
+                              //  await controller.room.typingNotice(true);
                             }),
                             maxLines: MediaQuery.of(context).orientation ==
                                     Orientation.portrait
                                 ? 6
                                 : 2,
                             minLines: 1,
-                            controller: controller.textEditingController,
                             focusNode: controller.focusNode,
                             style: const TextStyleRef(
                               TextStyle(color: ChatTheme01.chatInputTextColor),
@@ -125,6 +134,40 @@ class CustomChatInput extends StatelessWidget {
                               hintStyle: ChatTheme01.chatInputPlaceholderStyle,
                               hintMaxLines: 1,
                             ),
+                            mentions: [
+                              Mention(
+                                trigger: '@',
+                                style: const TextStyle(
+                                  color: AppCommonTheme.primaryColor,
+                                ),
+                                data: controller.roomMembers,
+                                matchAll: false,
+                                suggestionBuilder: (data) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    color: AppCommonTheme.backgroundColorLight,
+                                    child: ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.only(left: 50),
+                                      leading: CustomAvatar(
+                                        radius: 20,
+                                        avatar: data['avatar'],
+                                        isGroup: false,
+                                        stringName: data['display'],
+                                      ),
+                                      title: Text(
+                                        data['display'],
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -318,15 +361,17 @@ class EmojiPickerWidget extends StatelessWidget {
           height: size.height * 0.3,
           child: EmojiPicker(
             onEmojiSelected: (category, emoji) {
-              controller.textEditingController.text += emoji.emoji;
+              controller.mentionKey.currentState!.controller!.text +=
+                  emoji.emoji;
               controller.sendButtonUpdate();
             },
             onBackspacePressed: () {
-              controller.textEditingController.text = controller
-                  .textEditingController.text.characters
+              controller.mentionKey.currentState!.controller!.text = controller
+                  .mentionKey.currentState!.controller!.text.characters
                   .skipLast(1)
                   .string;
-              if (controller.textEditingController.text.isEmpty) {
+              if (controller
+                  .mentionKey.currentState!.controller!.text.isEmpty) {
                 controller.sendButtonUpdate();
               }
             },

@@ -15,6 +15,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_mentions/flutter_mentions.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -30,6 +31,7 @@ class ChatRoomController extends GetxController {
       Get.put<ChatRoomController>(ChatRoomController());
 
   List<types.Message> messages = [];
+  List<Map<String, dynamic>> roomMembers = [];
   TimelineStream? _stream;
   RxBool isLoading = false.obs;
   int _page = 0;
@@ -39,10 +41,14 @@ class ChatRoomController extends GetxController {
   RxBool isEmojiVisible = false.obs;
   RxBool isattachmentVisible = false.obs;
   FocusNode focusNode = FocusNode();
-  TextEditingController textEditingController = TextEditingController();
+  // TextEditingController textEditingController = TextEditingController();
+  GlobalKey<FlutterMentionsState> mentionKey =
+      GlobalKey<FlutterMentionsState>();
   bool isSendButtonVisible = false;
   final List<XFile> _imageFileList = [];
   late final StreamSubscription<RoomMessage> _subscription;
+  String messageText = '';
+  Map<String, String> messageTextMap = {};
 
   //get the timeline of room
   Future<void> init(Conversation convoRoom, types.User convoUser) async {
@@ -56,6 +62,7 @@ class ChatRoomController extends GetxController {
     user = convoUser;
     isLoading.value = true;
     _stream = await room.timeline();
+    _getRoomMembers();
     // i am fetching messages from remote
     var _messages = await _stream!.paginateBackwards(10);
     mtx.acquire();
@@ -117,7 +124,8 @@ class ChatRoomController extends GetxController {
     // image or video is sent automatically
     // user will click "send" button explicitly for text only
     await room.typingNotice(false);
-    var eventId = await room.sendPlainMessage(message);
+    var eventId = await room.sendFormattedMessage(message);
+
     final textMessage = types.TextMessage(
       author: user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -394,14 +402,30 @@ class ChatRoomController extends GetxController {
   }
 
   void sendButtonUpdate() {
-    isSendButtonVisible = textEditingController.text.trim().isNotEmpty;
+    isSendButtonVisible =
+        mentionKey.currentState!.controller!.text.trim().isNotEmpty;
     update();
+  }
+
+  void _getRoomMembers() {
+    room.activeMembers().then((memberList) {
+      roomMembers = memberList
+          .toList()
+          .map(
+            (member) => {
+              'avatar': member.avatar(),
+              'display': member.displayName(),
+              'link': member.userId(),
+            },
+          )
+          .where((member) => member['link'] != user.id)
+          .toList();
+    });
   }
 
   @override
   void onClose() {
     super.onClose();
-    textEditingController.dispose();
     focusNode.removeListener(() {});
   }
 }
