@@ -133,6 +133,9 @@ class ChatRoomController extends GetxController {
       text: message,
       status: types.Status.sent,
       showStatus: true,
+      metadata: {
+        'messageLength': message.length,
+      },
     );
     messages.insert(0, textMessage);
     update(['Chat']);
@@ -391,7 +394,10 @@ class ChatRoomController extends GetxController {
         ),
         createdAt: message.originServerTs() * 1000,
         id: message.eventId(),
-        text: message.body(),
+        text: formatted ?? message.body(),
+        metadata: {
+          'messageLength': message.body().length,
+        },
       );
       _insertMessage(m, container);
       if (isLoading.isFalse) {
@@ -408,18 +414,16 @@ class ChatRoomController extends GetxController {
   }
 
   void _getRoomMembers() {
-    room.activeMembers().then((memberList) {
-      roomMembers = memberList
-          .toList()
-          .map(
-            (member) => {
-              'avatar': member.avatar(),
-              'display': member.displayName(),
-              'link': member.userId(),
-            },
-          )
-          .where((member) => member['link'] != user.id)
-          .toList();
+    room.activeMembers().then((memberList) async {
+      for (final member in memberList) {
+        if (member.userId() != user.id) {
+          roomMembers.add({
+            'avatar': member.avatar(),
+            'display': member.displayName(),
+            'link': member.userId(),
+          });
+        }
+      }
     });
   }
 

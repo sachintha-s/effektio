@@ -18,6 +18,7 @@ import 'package:effektio_flutter_sdk/effektio_flutter_sdk_ffi.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:string_validator/string_validator.dart';
@@ -327,6 +328,29 @@ class _ChatScreenState extends State<ChatScreen> {
                   controller.sendButtonUpdate();
                 },
               ),
+
+              textMessageBuilder: ((
+                p0, {
+                required messageWidth,
+                required showName,
+              }) {
+                return Container(
+                  width: sqrt(
+                        p0.metadata!['messageLength'],
+                      ) *
+                      38.5,
+                  padding: EdgeInsets.all(12),
+                  constraints: BoxConstraints(minWidth: 57),
+                  child: Html(
+                    // ignore: prefer_single_quotes, unnecessary_string_interpolations
+                    data: """${p0.text}""",
+                    style: {
+                      'body': Style(color: Colors.white),
+                      'a': Style(textDecoration: TextDecoration.none)
+                    },
+                  ),
+                );
+              }),
               l10n: ChatL10nEn(
                 emptyChatPlaceholder: '',
                 attachmentButtonAccessibilityLabel: '',

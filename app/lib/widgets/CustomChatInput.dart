@@ -92,7 +92,7 @@ class CustomChatInput extends StatelessWidget {
                             },
                             onChanged: ((value) async {
                               controller.sendButtonUpdate();
-                              //  await controller.room.typingNotice(true);
+                              await controller.room.typingNotice(true);
                             }),
                             maxLines: MediaQuery.of(context).orientation ==
                                     Orientation.portrait
